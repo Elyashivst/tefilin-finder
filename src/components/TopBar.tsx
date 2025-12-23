@@ -1,6 +1,7 @@
-import { Search, SlidersHorizontal, User, Bell, MessageCircle, FileText, LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Search, SlidersHorizontal, User, Bell, MessageCircle, FileText, LogOut, MapPin, Home } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import {
@@ -16,11 +17,11 @@ import logoIcon from '@/assets/logo-icon.png';
 
 export function TopBar() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMobile = useIsMobile();
   const { isAuthenticated, user, language, setSnapPoint, setUser } = useApp();
 
   const handleLogout = async () => {
-    // Always clear the local session so UI + RLS state updates immediately,
-    // even if the server reports "session not found".
     const { error } = await supabase.auth.signOut({ scope: 'local' });
     setUser(null);
 
@@ -34,6 +35,11 @@ export function TopBar() {
     navigate('/');
   };
   
+  const navLinks = [
+    { path: '/', label: language === 'he' ? 'מפה' : 'Map', icon: MapPin },
+    { path: '/my-listings', label: language === 'he' ? 'הפרסומים שלי' : 'My Listings', icon: FileText },
+    { path: '/profile', label: language === 'he' ? 'פרופיל' : 'Profile', icon: User },
+  ];
   
   return (
     <motion.header
@@ -42,34 +48,63 @@ export function TopBar() {
       className="fixed top-0 left-0 right-0 z-50 safe-top"
     >
       <div className="bg-background/80 backdrop-blur-xl border-b border-border">
-        <div className="flex items-center justify-between px-4 h-14">
+        <div className="flex items-center justify-between px-4 lg:px-8 h-14">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <div 
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/')}
+          >
             <img src={logoIcon} alt="Logo" className="w-8 h-8 rounded-lg shadow-gold" />
             <span className="font-bold text-lg text-foreground">
               {language === 'he' ? 'אבן התועים' : 'Lost Tefillin'}
             </span>
           </div>
           
+          {/* Desktop Navigation */}
+          {!isMobile && isAuthenticated && (
+            <nav className="hidden md:flex items-center gap-1">
+              {navLinks.map((link) => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Button
+                    key={link.path}
+                    variant={isActive ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => navigate(link.path)}
+                    className={`gap-2 ${isActive ? 'bg-muted' : ''}`}
+                  >
+                    <link.icon className="h-4 w-4" />
+                    {link.label}
+                  </Button>
+                );
+              })}
+            </nav>
+          )}
+          
           {/* Actions */}
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-foreground"
-              onClick={() => setSnapPoint('full')}
-            >
-              <Search className="h-5 w-5" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-foreground"
-              onClick={() => setSnapPoint('full')}
-            >
-              <SlidersHorizontal className="h-5 w-5" />
-            </Button>
+            {/* Mobile-only search/filter buttons */}
+            {isMobile && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                  onClick={() => setSnapPoint('full')}
+                >
+                  <Search className="h-5 w-5" />
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                  onClick={() => setSnapPoint('full')}
+                >
+                  <SlidersHorizontal className="h-5 w-5" />
+                </Button>
+              </>
+            )}
             
             {isAuthenticated ? (
               <>
@@ -104,7 +139,7 @@ export function TopBar() {
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent align="end" className="w-48 bg-popover">
                     <div className="px-2 py-1.5 text-sm font-medium">
                       {user?.displayName || user?.email}
                     </div>
@@ -127,9 +162,9 @@ export function TopBar() {
               </>
             ) : (
               <Button
-                variant="ghost"
+                variant="default"
                 size="sm"
-                className="text-primary font-medium"
+                className="bg-gradient-gold text-primary-foreground hover:opacity-90"
                 onClick={() => navigate('/auth')}
               >
                 {language === 'he' ? 'התחברות' : 'Login'}

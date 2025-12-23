@@ -1,14 +1,17 @@
 import { TopBar } from '@/components/TopBar';
 import { Map } from '@/components/Map';
 import { BottomSheet } from '@/components/BottomSheet';
+import { DesktopSidebar } from '@/components/DesktopSidebar';
 import { useApp } from '@/contexts/AppContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Helmet } from 'react-helmet-async';
 
 export default function Home() {
   const { language, direction } = useApp();
+  const isMobile = useIsMobile();
   
   return (
-    <div dir={direction} className="fixed inset-0 overflow-hidden bg-background" style={{ height: '100dvh' }}>
+    <div dir={direction} className="fixed inset-0 overflow-hidden bg-background flex flex-col" style={{ height: '100dvh' }}>
       <Helmet>
         <html lang={language} dir={direction} />
         <title>{language === 'he' ? 'אבן התועים - איתור תפילין' : 'Lost Tefillin Finder'}</title>
@@ -26,13 +29,19 @@ export default function Home() {
       {/* Top Bar */}
       <TopBar />
       
-      {/* Map (full screen behind everything) */}
-      <main className="absolute inset-0 pt-14">
-        <Map />
-      </main>
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden pt-14">
+        {/* Map */}
+        <main className="flex-1 relative">
+          <Map />
+        </main>
+        
+        {/* Desktop Sidebar */}
+        {!isMobile && <DesktopSidebar />}
+      </div>
       
-      {/* Bottom Sheet */}
-      <BottomSheet />
+      {/* Bottom Sheet - Mobile Only */}
+      {isMobile && <BottomSheet />}
     </div>
   );
 }
