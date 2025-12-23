@@ -41,9 +41,13 @@ export default function MyListings() {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleMarkResolved = (listingId: string) => {
-    updateListing(listingId, { isResolved: true, isActive: false });
-    toast.success(language === 'he' ? 'המודעה סומנה כנמצא!' : 'Listing marked as found!');
+  const handleMarkResolved = async (listingId: string) => {
+    try {
+      await updateListing(listingId, { isResolved: true, isActive: false });
+      toast.success(language === 'he' ? 'המודעה סומנה כנמצא!' : 'Listing marked as found!');
+    } catch (error) {
+      toast.error(language === 'he' ? 'שגיאה בעדכון המודעה' : 'Error updating listing');
+    }
   };
 
   const handleDelete = (listingId: string) => {
@@ -51,12 +55,16 @@ export default function MyListings() {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (selectedListingId) {
-      deleteListingFromContext(selectedListingId);
-      toast.success(language === 'he' ? 'המודעה נמחקה' : 'Listing deleted');
-      setDeleteDialogOpen(false);
-      setSelectedListingId(null);
+      try {
+        await deleteListingFromContext(selectedListingId);
+        toast.success(language === 'he' ? 'המודעה נמחקה' : 'Listing deleted');
+        setDeleteDialogOpen(false);
+        setSelectedListingId(null);
+      } catch (error) {
+        toast.error(language === 'he' ? 'שגיאה במחיקת המודעה' : 'Error deleting listing');
+      }
     }
   };
 
