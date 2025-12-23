@@ -114,6 +114,9 @@ interface AppContextType {
   
   // Listings
   listings: Listing[];
+  addListing: (listing: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateListing: (id: string, updates: Partial<Listing>) => void;
+  deleteListing: (id: string) => void;
   selectedListing: Listing | null;
   setSelectedListing: (listing: Listing | null) => void;
   
@@ -183,8 +186,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Listings
-  const [listings] = useState<Listing[]>(mockListings);
+  const [listings, setListings] = useState<Listing[]>(mockListings);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+
+  const addListing = (listing: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newListing: Listing = {
+      ...listing,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setListings(prev => [newListing, ...prev]);
+  };
+
+  const updateListing = (id: string, updates: Partial<Listing>) => {
+    setListings(prev => prev.map(l => 
+      l.id === id ? { ...l, ...updates, updatedAt: new Date().toISOString() } : l
+    ));
+  };
+
+  const deleteListing = (id: string) => {
+    setListings(prev => prev.filter(l => l.id !== id));
+  };
   
   // Filters
   const [filters, setFilters] = useState<FilterState>({});
@@ -210,6 +233,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUser,
     isAuthenticated: !!user,
     listings,
+    addListing,
+    updateListing,
+    deleteListing,
     selectedListing,
     setSelectedListing,
     filters,
