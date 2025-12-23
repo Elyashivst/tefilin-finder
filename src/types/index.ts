@@ -106,4 +106,4 @@ export interface FilterState {
 export type SnapPoint = 'peek' | 'half' | 'full';
 
 // Report wizard steps
-export type ReportStep = 'status' | 'location' | 'details' | 'images' | 'publish';
+export type ReportStep = 'status' | 'location' | 'details' | 'publish';
