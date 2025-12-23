@@ -91,7 +91,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" dir={language === 'he' ? 'rtl' : 'ltr'}>
       {/* Header */}
       <motion.header
         initial={{ y: -100 }}

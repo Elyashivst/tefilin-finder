@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal, User, Bell, MessageCircle, FileText, LogOut, MapPin, Home } from 'lucide-react';
+import { Search, SlidersHorizontal, User, Bell, MessageCircle, FileText, LogOut, MapPin } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -14,6 +14,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import logoIcon from '@/assets/logo-icon.png';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function TopBar() {
   const navigate = useNavigate();
@@ -80,6 +81,9 @@ export function TopBar() {
           
           {/* Actions */}
           <div className="flex items-center gap-1">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+            
             {/* Mobile-only search/filter buttons */}
             {isMobile && (
               <>
