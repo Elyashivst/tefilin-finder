@@ -347,7 +347,7 @@ export function Map() {
       )}
 
       {/* Map controls */}
-      <div className="absolute left-4 bottom-64 flex flex-col gap-2 z-30">
+      <div className="absolute left-4 bottom-64 md:bottom-8 flex flex-col gap-2 z-30">
         <Button
           variant="secondary"
           size="icon"
@@ -379,13 +379,13 @@ export function Map() {
       </div>
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm rounded-lg shadow-md p-2 z-20 text-xs">
+      <div className="absolute bottom-4 md:bottom-8 left-4 md:left-auto md:right-4 bg-background/90 backdrop-blur-sm rounded-lg shadow-md p-2 md:p-3 z-20 text-xs md:text-sm">
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-3 h-3 rounded-full bg-status-lost" />
+          <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-status-lost" />
           <span>אבוד</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-status-found" />
+          <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-status-found" />
           <span>נמצא</span>
         </div>
       </div>
