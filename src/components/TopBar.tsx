@@ -1,10 +1,12 @@
 import { Search, SlidersHorizontal, User, Bell, MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import logoIcon from '@/assets/logo-icon.png';
 
 export function TopBar() {
+  const navigate = useNavigate();
   const { isAuthenticated, language, setSnapPoint } = useApp();
   
   return (
@@ -78,6 +80,7 @@ export function TopBar() {
                 variant="ghost"
                 size="sm"
                 className="text-primary font-medium"
+                onClick={() => navigate('/auth')}
               >
                 {language === 'he' ? 'התחברות' : 'Login'}
               </Button>
