@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal, User, Bell, MessageCircle, FileText, LogOut, MapPin } from 'lucide-react';
+import { Search, SlidersHorizontal, User, Bell, FileText, LogOut, MapPin } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -39,7 +39,7 @@ export function TopBar() {
   const navLinks = [
     { path: '/', label: language === 'he' ? 'מפה' : 'Map', icon: MapPin },
     { path: '/my-listings', label: language === 'he' ? 'הפרסומים שלי' : 'My Listings', icon: FileText },
-    { path: '/my-claims', label: language === 'he' ? 'פניות' : 'Claims', icon: Bell },
+    { path: '/my-claims', label: language === 'he' ? 'התראות' : 'Notifications', icon: Bell },
     { path: '/profile', label: language === 'he' ? 'פרופיל' : 'Profile', icon: User },
   ];
   
@@ -115,20 +115,10 @@ export function TopBar() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 text-muted-foreground hover:text-foreground"
-                  onClick={() => toast.info(language === 'he' ? 'אין הודעות חדשות' : 'No new messages')}
-                >
-                  <MessageCircle className="h-5 w-5" />
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  size="icon"
                   className="h-9 w-9 text-muted-foreground hover:text-foreground relative"
-                  onClick={() => toast.info(language === 'he' ? 'אין התראות חדשות' : 'No new notifications')}
+                  onClick={() => navigate('/my-claims')}
                 >
                   <Bell className="h-5 w-5" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
                 </Button>
                 
                 <DropdownMenu>
@@ -155,6 +145,10 @@ export function TopBar() {
                     <DropdownMenuItem onClick={() => navigate('/my-listings')}>
                       <FileText className="h-4 w-4 ml-2" />
                       {language === 'he' ? 'הפרסומים שלי' : 'My Listings'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/my-claims')}>
+                      <Bell className="h-4 w-4 ml-2" />
+                      {language === 'he' ? 'התראות' : 'Notifications'}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">

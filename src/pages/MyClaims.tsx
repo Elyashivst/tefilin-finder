@@ -149,7 +149,7 @@ export default function MyClaims() {
         
         <div className="flex items-center gap-2">
           <h1 className="font-semibold text-lg">
-            {language === 'he' ? 'פניות שהתקבלו' : 'Received Claims'}
+            {language === 'he' ? 'התראות' : 'Notifications'}
           </h1>
           {unreadCount > 0 && (
             <Badge variant="destructive" className="h-5 min-w-5 flex items-center justify-center">
