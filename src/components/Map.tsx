@@ -175,21 +175,15 @@ export function Map() {
   const createMarkerIcon = (status: 'lost' | 'found', isSelected: boolean) => {
     // Softer, more pleasant colors
     const color = status === 'lost' ? '#D9534F' : '#4DAF7C';
-    const size = isSelected ? 48 : 40;
-    const iconSize = isSelected ? 20 : 16;
-    
-    // Create an SVG with circle background and embedded icon
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-        <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="${color}" stroke="white" stroke-width="3"/>
-        <image href="/images/marker-icon.png" x="${(size - iconSize) / 2}" y="${(size - iconSize) / 2}" width="${iconSize}" height="${iconSize}"/>
-      </svg>
-    `;
+    const size = isSelected ? 32 : 24;
     
     return {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-      scaledSize: new google.maps.Size(size, size),
-      anchor: new google.maps.Point(size / 2, size / 2),
+      path: google.maps.SymbolPath.CIRCLE,
+      fillColor: color,
+      fillOpacity: 1,
+      strokeColor: '#FFFFFF',
+      strokeWeight: 3,
+      scale: size / 2,
     };
   };
 
@@ -226,7 +220,6 @@ export function Map() {
             position={{ lat: listing.latitude, lng: listing.longitude }}
             icon={createMarkerIcon(listing.status, selectedListing?.id === listing.id)}
             onClick={() => handleMarkerClick(listing)}
-            animation={selectedListing?.id === listing.id ? google.maps.Animation.BOUNCE : undefined}
           />
         ))}
         
