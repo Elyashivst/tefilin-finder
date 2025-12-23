@@ -105,8 +105,8 @@ export function BottomSheet() {
       );
     }
     
-    // Preview mode when listing is selected
-    if (selectedListing && snapPoint !== 'full') {
+    // Preview mode when listing is selected (show even when full)
+    if (selectedListing) {
       return (
         <ListingPreview 
           listing={selectedListing} 

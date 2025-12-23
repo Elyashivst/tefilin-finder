@@ -36,7 +36,7 @@ export function ListingPreview({ listing, onClose }: ListingPreviewProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      className="p-4"
+      className="p-4 pb-8 overflow-auto max-h-[calc(100vh-120px)]"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
