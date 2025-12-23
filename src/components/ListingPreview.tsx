@@ -66,8 +66,8 @@ export function ListingPreview({ listing, onClose }: ListingPreviewProps) {
         </Button>
       </div>
       
-      {/* Image placeholder */}
-      {listing.images.length > 0 ? (
+      {/* Image - only show if images exist */}
+      {listing.images.length > 0 && (
         <div className="relative mb-4">
           <div className="aspect-video rounded-xl bg-muted overflow-hidden">
             <div className={`w-full h-full bg-muted ${listing.blurImages ? 'blur-tefillin' : ''}`} />
@@ -80,18 +80,6 @@ export function ListingPreview({ listing, onClose }: ListingPreviewProps) {
               </Button>
             </div>
           )}
-        </div>
-      ) : (
-        <div className={`
-          aspect-video rounded-xl mb-4 flex items-center justify-center
-          ${listing.status === 'lost' ? 'bg-status-lost/10' : 'bg-status-found/10'}
-        `}>
-          <span className={`
-            text-6xl opacity-50
-            ${listing.status === 'lost' ? 'text-status-lost' : 'text-status-found'}
-          `}>
-            {listing.status === 'lost' ? '?' : '✓'}
-          </span>
         </div>
       )}
       
