@@ -1,6 +1,7 @@
 import { useCallback, useState, useRef, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
 import { useApp } from '@/contexts/AppContext';
+import { useTheme } from '@/hooks/use-theme';
 import { Locate, Plus, Minus, Search, X, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,26 +16,163 @@ const mapContainerStyle = {
   height: '100%',
 };
 
-const mapOptions: google.maps.MapOptions = {
-  disableDefaultUI: true,
-  zoomControl: false,
-  mapTypeControl: false,
-  streetViewControl: false,
-  fullscreenControl: false,
-  gestureHandling: 'greedy',
-  styles: [
-    {
-      featureType: 'poi',
-      elementType: 'labels',
-      stylers: [{ visibility: 'off' }],
-    },
-    {
-      featureType: 'transit',
-      elementType: 'labels',
-      stylers: [{ visibility: 'off' }],
-    },
-  ],
-};
+// Light mode - warm golden tones
+const lightMapStyles: google.maps.MapTypeStyle[] = [
+  {
+    featureType: 'all',
+    elementType: 'geometry',
+    stylers: [{ color: '#f5f1e8' }],
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry',
+    stylers: [{ color: '#c9d6df' }],
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#7a9eb8' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry',
+    stylers: [{ color: '#ffffff' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#e8e0d0' }],
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry',
+    stylers: [{ color: '#f8d57e' }],
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#e0c060' }],
+  },
+  {
+    featureType: 'landscape.natural',
+    elementType: 'geometry',
+    stylers: [{ color: '#e8e4d8' }],
+  },
+  {
+    featureType: 'landscape.man_made',
+    elementType: 'geometry',
+    stylers: [{ color: '#f0ece0' }],
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'geometry',
+    stylers: [{ color: '#c8dbb8' }],
+  },
+  {
+    featureType: 'poi',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }],
+  },
+  {
+    featureType: 'transit',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }],
+  },
+  {
+    featureType: 'administrative',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#c8a02b' }, { weight: 1 }],
+  },
+  {
+    featureType: 'administrative.locality',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#5a5040' }],
+  },
+];
+
+// Dark mode - elegant navy and gold
+const darkMapStyles: google.maps.MapTypeStyle[] = [
+  {
+    featureType: 'all',
+    elementType: 'geometry',
+    stylers: [{ color: '#1a1f2e' }],
+  },
+  {
+    featureType: 'all',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#8a9bb0' }],
+  },
+  {
+    featureType: 'all',
+    elementType: 'labels.text.stroke',
+    stylers: [{ color: '#1a1f2e' }, { weight: 2 }],
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry',
+    stylers: [{ color: '#0e1420' }],
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#3a5068' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry',
+    stylers: [{ color: '#2a3040' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#1a2030' }],
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry',
+    stylers: [{ color: '#3a4050' }],
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#c8a02b' }, { weight: 0.5 }],
+  },
+  {
+    featureType: 'landscape.natural',
+    elementType: 'geometry',
+    stylers: [{ color: '#1e2535' }],
+  },
+  {
+    featureType: 'landscape.man_made',
+    elementType: 'geometry',
+    stylers: [{ color: '#222838' }],
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'geometry',
+    stylers: [{ color: '#1a2a28' }],
+  },
+  {
+    featureType: 'poi',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }],
+  },
+  {
+    featureType: 'transit',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }],
+  },
+  {
+    featureType: 'administrative',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#c8a02b' }, { weight: 0.8 }],
+  },
+  {
+    featureType: 'administrative.locality',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#d4af37' }],
+  },
+];
 
 export function Map() {
   const { 
@@ -48,6 +186,19 @@ export function Map() {
     setReportStatus,
     language,
   } = useApp();
+  
+  const { theme } = useTheme();
+  
+  // Dynamic map options based on theme
+  const mapOptions: google.maps.MapOptions = {
+    disableDefaultUI: true,
+    zoomControl: false,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    gestureHandling: 'greedy',
+    styles: theme === 'dark' ? darkMapStyles : lightMapStyles,
+  };
   
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [zoom, setZoom] = useState(8);
@@ -71,6 +222,15 @@ export function Map() {
       geocoderRef.current = new google.maps.Geocoder();
     }
   }, [isLoaded]);
+
+  // Update map styles when theme changes
+  useEffect(() => {
+    if (map) {
+      map.setOptions({
+        styles: theme === 'dark' ? darkMapStyles : lightMapStyles,
+      });
+    }
+  }, [theme, map]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
