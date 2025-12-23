@@ -1,96 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Noto+Sans+Hebrew:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Warm gold and deep navy palette */
+    --background: 40 30% 98%;
+    --foreground: 220 40% 13%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 40 25% 97%;
+    --card-foreground: 220 40% 13%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 40 25% 97%;
+    --popover-foreground: 220 40% 13%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Gold/Amber primary - religious significance */
+    --primary: 38 85% 45%;
+    --primary-foreground: 40 30% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Deep navy secondary */
+    --secondary: 220 45% 20%;
+    --secondary-foreground: 40 30% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 40 20% 92%;
+    --muted-foreground: 220 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 38 70% 55%;
+    --accent-foreground: 220 40% 13%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 40 30% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Status colors */
+    --status-lost: 0 75% 55%;
+    --status-lost-foreground: 0 0% 100%;
+    --status-found: 142 65% 40%;
+    --status-found-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 38 85% 45%;
 
-    --sidebar-background: 0 0% 98%;
+    --radius: 0.75rem;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Bottom sheet */
+    --sheet-handle: 220 20% 75%;
+    --sheet-overlay: 220 40% 10%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Map */
+    --map-pin-lost: 0 75% 55%;
+    --map-pin-found: 142 65% 40%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, hsl(38, 85%, 45%), hsl(45, 90%, 55%));
+    --gradient-navy: linear-gradient(135deg, hsl(220, 45%, 20%), hsl(230, 50%, 30%));
+    --gradient-warm: linear-gradient(180deg, hsl(40, 30%, 98%), hsl(40, 25%, 94%));
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    /* Shadows */
+    --shadow-sm: 0 1px 3px hsl(220, 40%, 13%, 0.08);
+    --shadow-md: 0 4px 12px hsl(220, 40%, 13%, 0.12);
+    --shadow-lg: 0 8px 24px hsl(220, 40%, 13%, 0.16);
+    --shadow-gold: 0 4px 20px hsl(38, 85%, 45%, 0.3);
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar */
+    --sidebar-background: 40 25% 97%;
+    --sidebar-foreground: 220 40% 13%;
+    --sidebar-primary: 38 85% 45%;
+    --sidebar-primary-foreground: 40 30% 98%;
+    --sidebar-accent: 40 20% 92%;
+    --sidebar-accent-foreground: 220 40% 13%;
+    --sidebar-border: 40 20% 88%;
+    --sidebar-ring: 38 85% 45%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 45% 8%;
+    --foreground: 40 20% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 40% 12%;
+    --card-foreground: 40 20% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 40% 12%;
+    --popover-foreground: 40 20% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 38 85% 50%;
+    --primary-foreground: 220 45% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 40 25% 85%;
+    --secondary-foreground: 220 45% 8%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 35% 18%;
+    --muted-foreground: 40 15% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 38 70% 55%;
+    --accent-foreground: 220 45% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 40 30% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --status-lost: 0 72% 60%;
+    --status-lost-foreground: 0 0% 100%;
+    --status-found: 142 60% 50%;
+    --status-found-foreground: 0 0% 100%;
+
+    --border: 220 35% 20%;
+    --input: 220 35% 20%;
+    --ring: 38 85% 50%;
+
+    --sheet-handle: 220 25% 40%;
+    --sheet-overlay: 220 50% 5%;
+
+    --gradient-gold: linear-gradient(135deg, hsl(38, 85%, 50%), hsl(45, 90%, 60%));
+    --gradient-navy: linear-gradient(135deg, hsl(220, 40%, 15%), hsl(230, 45%, 25%));
+    --gradient-warm: linear-gradient(180deg, hsl(220, 45%, 8%), hsl(220, 40%, 12%));
+
+    --shadow-sm: 0 1px 3px hsl(0, 0%, 0%, 0.3);
+    --shadow-md: 0 4px 12px hsl(0, 0%, 0%, 0.4);
+    --shadow-lg: 0 8px 24px hsl(0, 0%, 0%, 0.5);
+    --shadow-gold: 0 4px 20px hsl(38, 85%, 50%, 0.25);
+
+    --sidebar-background: 220 40% 12%;
+    --sidebar-foreground: 40 20% 95%;
+    --sidebar-primary: 38 85% 50%;
+    --sidebar-primary-foreground: 220 45% 8%;
+    --sidebar-accent: 220 35% 18%;
+    --sidebar-accent-foreground: 40 20% 95%;
+    --sidebar-border: 220 35% 20%;
+    --sidebar-ring: 38 85% 50%;
   }
 }
 
@@ -99,7 +137,129 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    font-family: 'Heebo', 'Noto Sans Hebrew', system-ui, sans-serif;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* RTL Support */
+  [dir="rtl"] {
+    font-family: 'Heebo', 'Noto Sans Hebrew', system-ui, sans-serif;
+  }
+
+  [dir="ltr"] {
+    font-family: 'Heebo', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Status badges */
+  .status-lost {
+    @apply bg-[hsl(var(--status-lost))] text-[hsl(var(--status-lost-foreground))];
+  }
+
+  .status-found {
+    @apply bg-[hsl(var(--status-found))] text-[hsl(var(--status-found-foreground))];
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-gold {
+    background: var(--gradient-gold);
+  }
+
+  .bg-gradient-navy {
+    background: var(--gradient-navy);
+  }
+
+  .bg-gradient-warm {
+    background: var(--gradient-warm);
+  }
+
+  /* Shadow utilities */
+  .shadow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+
+  /* Bottom sheet handle */
+  .sheet-handle {
+    @apply w-10 h-1 rounded-full bg-[hsl(var(--sheet-handle))];
+  }
+
+  /* Map marker styles */
+  .map-marker-lost {
+    @apply w-8 h-8 rounded-full bg-[hsl(var(--map-pin-lost))] border-2 border-background shadow-md;
+  }
+
+  .map-marker-found {
+    @apply w-8 h-8 rounded-full bg-[hsl(var(--map-pin-found))] border-2 border-background shadow-md;
+  }
+
+  /* Blur effect for images */
+  .blur-tefillin {
+    filter: blur(8px);
+  }
+
+  /* Smooth transitions */
+  .transition-sheet {
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Safe area padding for mobile */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+}
+
+/* Mapbox overrides */
+.mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-bottom-right {
+  display: none !important;
+}
+
+.mapboxgl-ctrl-top-right {
+  top: auto !important;
+  bottom: 280px !important;
+  right: 12px !important;
+}
+
+/* Custom scrollbar for desktop */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground));
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--foreground));
   }
 }
