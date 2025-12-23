@@ -22,7 +22,6 @@ export function TopBar() {
             <img src={logoIcon} alt="Logo" className="w-8 h-8 rounded-lg shadow-gold" />
             <span className="font-bold text-lg text-foreground">
               {language === 'he' ? 'אבן התועים' : 'Lost Tefillin'}
-              {language === 'he' ? 'אבן התועים' : 'Lost Tefillin'}
             </span>
           </div>
           
