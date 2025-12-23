@@ -8,7 +8,7 @@ function AppContent() {
   const { language, direction } = useApp();
   
   return (
-    <div dir={direction} className="h-screen w-screen overflow-hidden bg-background">
+    <div dir={direction} className="fixed inset-0 overflow-hidden bg-background" style={{ height: '100dvh' }}>
       <Helmet>
         <html lang={language} dir={direction} />
         <title>{language === 'he' ? 'אבן התועים - איתור תפילין' : 'Lost Tefillin Finder'}</title>

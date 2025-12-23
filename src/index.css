@@ -139,10 +139,22 @@
 
   html {
     font-family: 'Heebo', 'Noto Sans Hebrew', system-ui, sans-serif;
+    height: 100%;
+    height: 100dvh;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  #root {
+    height: 100%;
+    height: 100dvh;
   }
 
   /* RTL Support */
