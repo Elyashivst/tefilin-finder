@@ -1,7 +1,7 @@
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
 import { useApp } from '@/contexts/AppContext';
-import { Locate, Plus, Minus, Search, X } from 'lucide-react';
+import { Locate, Plus, Minus, Search, X, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,7 +21,7 @@ const mapOptions: google.maps.MapOptions = {
   mapTypeControl: false,
   streetViewControl: false,
   fullscreenControl: false,
-  gestureHandling: 'greedy', // Enable pinch-to-zoom and all touch gestures
+  gestureHandling: 'greedy',
   styles: [
     {
       featureType: 'poi',
@@ -44,6 +44,9 @@ export function Map() {
     setSnapPoint,
     mapCenter,
     setMapCenter,
+    setIsReporting,
+    setReportStatus,
+    language,
   } = useApp();
   
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -51,7 +54,10 @@ export function Map() {
   const [isLocating, setIsLocating] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [clickedLocation, setClickedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showReportPrompt, setShowReportPrompt] = useState(false);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
@@ -59,6 +65,12 @@ export function Map() {
     language: 'he',
     region: 'IL',
   });
+
+  useEffect(() => {
+    if (isLoaded && !geocoderRef.current) {
+      geocoderRef.current = new google.maps.Geocoder();
+    }
+  }, [isLoaded]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
@@ -71,9 +83,27 @@ export function Map() {
   const handleMarkerClick = (listing: typeof listings[0]) => {
     setSelectedListing(listing);
     setSnapPoint('half');
+    setShowReportPrompt(false);
     if (map) {
       map.panTo({ lat: listing.latitude, lng: listing.longitude });
     }
+  };
+
+  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      const lat = e.latLng.lat();
+      const lng = e.latLng.lng();
+      setClickedLocation({ lat, lng });
+      setShowReportPrompt(true);
+      setSelectedListing(null);
+    }
+  };
+
+  const handleStartReport = async (status: 'lost' | 'found') => {
+    setShowReportPrompt(false);
+    setReportStatus(status);
+    setIsReporting(true);
+    setSnapPoint('full');
   };
 
   const handleLocateMe = () => {
@@ -181,6 +211,7 @@ export function Map() {
         onLoad={onLoad}
         onUnmount={onUnmount}
         options={mapOptions}
+        onClick={handleMapClick}
       >
         {listings.map((listing) => (
           <Marker
@@ -191,7 +222,77 @@ export function Map() {
             animation={selectedListing?.id === listing.id ? google.maps.Animation.BOUNCE : undefined}
           />
         ))}
+        
+        {/* Clicked location marker */}
+        {clickedLocation && showReportPrompt && (
+          <Marker
+            position={clickedLocation}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              fillColor: '#C8A02B',
+              fillOpacity: 1,
+              strokeColor: '#FFFFFF',
+              strokeWeight: 3,
+              scale: 14,
+            }}
+          />
+        )}
       </GoogleMap>
+
+      {/* Report prompt popup */}
+      <AnimatePresence>
+        {showReportPrompt && clickedLocation && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="absolute top-1/3 left-4 right-4 z-40"
+          >
+            <div className="bg-background rounded-xl shadow-xl p-4 border border-border">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold">
+                  {language === 'he' ? 'דווח על תפילין' : 'Report Tefillin'}
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    setShowReportPrompt(false);
+                    setClickedLocation(null);
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <p className="text-sm text-muted-foreground mb-4">
+                {language === 'he' 
+                  ? 'לחצת על מיקום במפה. מה תרצה לדווח?' 
+                  : 'You clicked a location. What would you like to report?'}
+              </p>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={() => handleStartReport('lost')}
+                  className="h-12 gap-2 bg-status-lost hover:bg-status-lost/90"
+                >
+                  <AlertCircle className="h-4 w-4" />
+                  {language === 'he' ? 'איבדתי' : 'I Lost'}
+                </Button>
+                
+                <Button
+                  onClick={() => handleStartReport('found')}
+                  className="h-12 gap-2 bg-status-found hover:bg-status-found/90"
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  {language === 'he' ? 'מצאתי' : 'I Found'}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Search bar */}
       <AnimatePresence>
