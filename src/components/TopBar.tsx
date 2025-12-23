@@ -109,6 +109,10 @@ export function TopBar() {
                       {user?.displayName || user?.email}
                     </div>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/profile')}>
+                      <User className="h-4 w-4 ml-2" />
+                      {language === 'he' ? 'הפרופיל שלי' : 'My Profile'}
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/my-listings')}>
                       <FileText className="h-4 w-4 ml-2" />
                       {language === 'he' ? 'הפרסומים שלי' : 'My Listings'}
