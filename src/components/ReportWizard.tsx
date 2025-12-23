@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronRight, 
@@ -8,6 +9,7 @@ import {
   Image as ImageIcon, 
   Check,
   ArrowLeft,
+  LogIn,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
@@ -15,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { LocationPicker } from '@/components/LocationPicker';
 import { ReportStep, TefillinType } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 const steps: ReportStep[] = ['status', 'location', 'details', 'images', 'publish'];
 
@@ -23,7 +26,8 @@ interface ReportWizardProps {
 }
 
 export function ReportWizard({ onClose }: ReportWizardProps) {
-  const { language, reportStatus, setReportStatus, isAuthenticated } = useApp();
+  const navigate = useNavigate();
+  const { language, reportStatus, setReportStatus, isAuthenticated, user } = useApp();
   const [currentStep, setCurrentStep] = useState<ReportStep>('status');
   const [formData, setFormData] = useState({
     status: reportStatus || 'lost' as const,
@@ -67,12 +71,18 @@ export function ReportWizard({ onClose }: ReportWizardProps) {
   
   const handlePublish = () => {
     if (!isAuthenticated) {
-      // Would trigger auth flow here
-      alert(language === 'he' ? 'יש להתחבר כדי לפרסם' : 'Please login to publish');
+      // Store form data in session storage and redirect to auth
+      sessionStorage.setItem('pendingReport', JSON.stringify(formData));
+      navigate('/auth?redirect=report');
       return;
     }
     // Would submit to backend here
     onClose();
+  };
+
+  const handleLoginClick = () => {
+    sessionStorage.setItem('pendingReport', JSON.stringify(formData));
+    navigate('/auth?redirect=report');
   };
   
   return (
@@ -333,41 +343,69 @@ export function ReportWizard({ onClose }: ReportWizardProps) {
             {/* Publish Step */}
             {currentStep === 'publish' && (
               <div className="space-y-4">
-                <div className="text-center py-6">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-gold flex items-center justify-center shadow-gold">
-                    <Check className="h-10 w-10 text-primary-foreground" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">
-                    {language === 'he' ? 'הכל מוכן!' : 'All Set!'}
-                  </h3>
-                  <p className="text-muted-foreground">
-                    {language === 'he' 
-                      ? 'המודעה שלך תפורסם ותופיע במפה' 
-                      : 'Your listing will be published and appear on the map'
-                    }
-                  </p>
-                </div>
-                
-                {/* Summary */}
-                <div className="bg-muted rounded-xl p-4 space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{language === 'he' ? 'סטטוס:' : 'Status:'}</span>
-                    <span className={formData.status === 'lost' ? 'text-status-lost' : 'text-status-found'}>
-                      {formData.status === 'lost' 
-                        ? (language === 'he' ? 'אבד' : 'Lost')
-                        : (language === 'he' ? 'נמצא' : 'Found')
+                {!isAuthenticated ? (
+                  // Login prompt
+                  <div className="text-center py-6">
+                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                      <LogIn className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">
+                      {language === 'he' ? 'יש להתחבר כדי לפרסם' : 'Login Required'}
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      {language === 'he' 
+                        ? 'כדי לפרסם מודעה ולנהל אותה, יש להתחבר לחשבון' 
+                        : 'To publish and manage your listing, please login'
                       }
-                    </span>
+                    </p>
+                    <Button 
+                      onClick={handleLoginClick}
+                      className="bg-gradient-gold text-primary-foreground hover:opacity-90 shadow-gold"
+                    >
+                      <LogIn className="h-4 w-4 mr-2" />
+                      {language === 'he' ? 'התחבר / הירשם' : 'Login / Sign Up'}
+                    </Button>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{language === 'he' ? 'מיקום:' : 'Location:'}</span>
-                    <span>{formData.city || formData.address || '-'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{language === 'he' ? 'תאריך:' : 'Date:'}</span>
-                    <span>{formData.date}</span>
-                  </div>
-                </div>
+                ) : (
+                  // Ready to publish
+                  <>
+                    <div className="text-center py-6">
+                      <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-gold flex items-center justify-center shadow-gold">
+                        <Check className="h-10 w-10 text-primary-foreground" />
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2">
+                        {language === 'he' ? 'הכל מוכן!' : 'All Set!'}
+                      </h3>
+                      <p className="text-muted-foreground">
+                        {language === 'he' 
+                          ? 'המודעה שלך תפורסם ותופיע במפה' 
+                          : 'Your listing will be published and appear on the map'
+                        }
+                      </p>
+                    </div>
+                    
+                    {/* Summary */}
+                    <div className="bg-muted rounded-xl p-4 space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{language === 'he' ? 'סטטוס:' : 'Status:'}</span>
+                        <span className={formData.status === 'lost' ? 'text-status-lost' : 'text-status-found'}>
+                          {formData.status === 'lost' 
+                            ? (language === 'he' ? 'אבד' : 'Lost')
+                            : (language === 'he' ? 'נמצא' : 'Found')
+                          }
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{language === 'he' ? 'מיקום:' : 'Location:'}</span>
+                        <span>{formData.city || formData.address || '-'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{language === 'he' ? 'תאריך:' : 'Date:'}</span>
+                        <span>{formData.date}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </motion.div>
@@ -377,12 +415,14 @@ export function ReportWizard({ onClose }: ReportWizardProps) {
       {/* Footer */}
       <div className="p-4 border-t border-border">
         {isLastStep ? (
-          <Button 
-            onClick={handlePublish}
-            className="w-full bg-gradient-gold text-primary-foreground hover:opacity-90 shadow-gold"
-          >
-            {language === 'he' ? 'פרסם מודעה' : 'Publish Listing'}
-          </Button>
+          isAuthenticated ? (
+            <Button 
+              onClick={handlePublish}
+              className="w-full bg-gradient-gold text-primary-foreground hover:opacity-90 shadow-gold"
+            >
+              {language === 'he' ? 'פרסם מודעה' : 'Publish Listing'}
+            </Button>
+          ) : null
         ) : (
           <Button 
             onClick={goNext}

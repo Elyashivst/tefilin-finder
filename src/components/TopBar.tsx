@@ -1,13 +1,28 @@
-import { Search, SlidersHorizontal, User, Bell, MessageCircle } from 'lucide-react';
+import { Search, SlidersHorizontal, User, Bell, MessageCircle, FileText, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import logoIcon from '@/assets/logo-icon.png';
 
 export function TopBar() {
   const navigate = useNavigate();
-  const { isAuthenticated, language, setSnapPoint } = useApp();
+  const { isAuthenticated, user, language, setSnapPoint } = useApp();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success(language === 'he' ? 'התנתקת בהצלחה' : 'Logged out successfully');
+  };
+  
   
   return (
     <motion.header
@@ -64,15 +79,34 @@ export function TopBar() {
                   <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
                 </Button>
                 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                >
-                  <div className="w-7 h-7 bg-gradient-gold rounded-full flex items-center justify-center">
-                    <User className="h-4 w-4 text-primary-foreground" />
-                  </div>
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9"
+                    >
+                      <div className="w-7 h-7 bg-gradient-gold rounded-full flex items-center justify-center">
+                        <User className="h-4 w-4 text-primary-foreground" />
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <div className="px-2 py-1.5 text-sm font-medium">
+                      {user?.displayName || user?.email}
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/my-listings')}>
+                      <FileText className="h-4 w-4 ml-2" />
+                      {language === 'he' ? 'הפרסומים שלי' : 'My Listings'}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                      <LogOut className="h-4 w-4 ml-2" />
+                      {language === 'he' ? 'התנתקות' : 'Logout'}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
               <Button

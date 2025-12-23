@@ -1,6 +1,6 @@
 import { useCallback, useState, useRef, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
-import { Crosshair, Search, X } from 'lucide-react';
+import { Crosshair, Search, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -51,6 +51,7 @@ export function LocationPicker({
   const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const geocoderRef = useRef<google.maps.Geocoder | null>(null);
 
@@ -145,6 +146,7 @@ export function LocationPicker({
 
   const handleUseCurrentLocation = () => {
     if (navigator.geolocation) {
+      setIsLocating(true);
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const lat = position.coords.latitude;
@@ -160,10 +162,13 @@ export function LocationPicker({
           
           const { address, city } = await reverseGeocode(lat, lng);
           onLocationSelect({ lat, lng, address, city });
+          setIsLocating(false);
         },
         (error) => {
           console.error('Geolocation error:', error);
-        }
+          setIsLocating(false);
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
       );
     }
   };
@@ -259,12 +264,11 @@ export function LocationPicker({
         )}
       </AnimatePresence>
 
-      {/* Controls */}
       <div className="absolute bottom-2 right-2 flex gap-1.5 z-10">
         <Button
           variant="secondary"
           size="sm"
-          className="h-8 bg-background shadow-md text-xs"
+          className="h-8 bg-background shadow-md text-xs text-foreground"
           onClick={() => setShowSearch(true)}
         >
           <Search className="h-3.5 w-3.5 mr-1" />
@@ -273,11 +277,18 @@ export function LocationPicker({
         <Button
           variant="secondary"
           size="sm"
-          className="h-8 bg-background shadow-md text-xs"
+          className="h-8 bg-background shadow-md text-xs text-foreground"
           onClick={handleUseCurrentLocation}
+          disabled={isLocating}
         >
-          <Crosshair className="h-3.5 w-3.5 mr-1" />
-          {language === 'he' ? 'מיקומי' : 'My Location'}
+          {isLocating ? (
+            <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+          ) : (
+            <Crosshair className="h-3.5 w-3.5 mr-1" />
+          )}
+          {isLocating 
+            ? (language === 'he' ? 'מאתר...' : 'Locating...') 
+            : (language === 'he' ? 'מיקומי' : 'My Location')}
         </Button>
       </div>
     </div>
