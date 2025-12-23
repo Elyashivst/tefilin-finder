@@ -55,7 +55,9 @@ export function TopBar() {
             className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate('/')}
           >
-            <img src={logoIcon} alt="אבן התועים" className="h-10 w-auto object-contain" />
+            <div className="dark:bg-white dark:rounded-xl dark:p-1">
+              <img src={logoIcon} alt="אבן התועים" className="h-10 w-auto object-contain" />
+            </div>
           </div>
           
           {/* Desktop Navigation */}
