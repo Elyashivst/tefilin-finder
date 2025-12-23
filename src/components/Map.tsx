@@ -338,7 +338,7 @@ export function Map() {
           <Button
             variant="secondary"
             size="icon"
-            className="h-10 w-10 bg-background shadow-md hover:shadow-lg"
+            className="h-10 w-10 bg-card text-foreground shadow-md hover:shadow-lg border border-border"
             onClick={() => setShowSearch(true)}
           >
             <Search className="h-5 w-5" />
@@ -351,18 +351,18 @@ export function Map() {
         <Button
           variant="secondary"
           size="icon"
-          className="h-10 w-10 bg-background shadow-md hover:shadow-lg"
+          className="h-10 w-10 bg-card text-foreground shadow-md hover:shadow-lg border border-border"
           onClick={handleLocateMe}
           disabled={isLocating}
         >
           <Locate className={`h-5 w-5 ${isLocating ? 'animate-pulse' : ''}`} />
         </Button>
         
-        <div className="flex flex-col bg-background rounded-lg shadow-md overflow-hidden">
+        <div className="flex flex-col bg-card rounded-lg shadow-md overflow-hidden border border-border">
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 rounded-none border-b border-border"
+            className="h-10 w-10 rounded-none border-b border-border text-foreground"
             onClick={handleZoomIn}
           >
             <Plus className="h-5 w-5" />
@@ -370,7 +370,7 @@ export function Map() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 rounded-none"
+            className="h-10 w-10 rounded-none text-foreground"
             onClick={handleZoomOut}
           >
             <Minus className="h-5 w-5" />
