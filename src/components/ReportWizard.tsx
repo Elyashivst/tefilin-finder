@@ -8,12 +8,12 @@ import {
   Image as ImageIcon, 
   Check,
   ArrowLeft,
-  Crosshair
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { LocationPicker } from '@/components/LocationPicker';
 import { ReportStep, TefillinType } from '@/types';
 
 const steps: ReportStep[] = ['status', 'location', 'details', 'images', 'publish'];
@@ -198,17 +198,17 @@ export function ReportWizard({ onClose }: ReportWizardProps) {
                   {language === 'he' ? 'איפה?' : 'Where?'}
                 </h3>
                 
-                {/* Map placeholder for location selection */}
-                <div className="relative aspect-video rounded-xl bg-muted border-2 border-dashed border-border overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <Crosshair className="h-10 w-10 mx-auto text-primary mb-2" />
-                      <p className="text-sm text-muted-foreground">
-                        {language === 'he' ? 'הזז את המפה לבחירת מיקום' : 'Move map to select location'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {/* Location Picker with Google Maps */}
+                <LocationPicker
+                  onLocationSelect={(location) => {
+                    setFormData({
+                      ...formData,
+                      address: location.address,
+                      city: location.city,
+                    });
+                  }}
+                  language={language}
+                />
                 
                 <div className="space-y-3">
                   <Input

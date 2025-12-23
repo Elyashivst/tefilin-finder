@@ -21,6 +21,7 @@ const mapOptions: google.maps.MapOptions = {
   mapTypeControl: false,
   streetViewControl: false,
   fullscreenControl: false,
+  gestureHandling: 'greedy', // Enable pinch-to-zoom and all touch gestures
   styles: [
     {
       featureType: 'poi',
