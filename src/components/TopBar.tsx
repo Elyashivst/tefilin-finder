@@ -51,13 +51,10 @@ export function TopBar() {
         <div className="flex items-center justify-between px-4 lg:px-8 h-14">
           {/* Logo */}
           <div 
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate('/')}
           >
-            <img src={logoIcon} alt="Logo" className="w-8 h-8 rounded-lg shadow-gold" />
-            <span className="font-bold text-lg text-foreground">
-              {language === 'he' ? 'אבן התועים' : 'Lost Tefillin'}
-            </span>
+            <img src={logoIcon} alt="אבן התועים" className="h-10 w-auto object-contain" />
           </div>
           
           {/* Desktop Navigation */}
