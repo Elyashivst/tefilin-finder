@@ -6,7 +6,6 @@ import {
   MapPin, 
   Calendar, 
   Info, 
-  Image as ImageIcon, 
   Check,
   ArrowLeft,
   LogIn,
@@ -19,7 +18,7 @@ import { LocationPicker } from '@/components/LocationPicker';
 import { ReportStep, TefillinType } from '@/types';
 import { toast } from 'sonner';
 
-const steps: ReportStep[] = ['status', 'location', 'details', 'images', 'publish'];
+const steps: ReportStep[] = ['status', 'location', 'details', 'publish'];
 
 interface ReportWizardProps {
   onClose: () => void;
@@ -53,7 +52,6 @@ export function ReportWizard({ onClose }: ReportWizardProps) {
     status: language === 'he' ? 'סטטוס' : 'Status',
     location: language === 'he' ? 'מיקום' : 'Location',
     details: language === 'he' ? 'פרטים' : 'Details',
-    images: language === 'he' ? 'תמונות' : 'Images',
     publish: language === 'he' ? 'פרסום' : 'Publish',
   };
   
@@ -331,44 +329,6 @@ export function ReportWizard({ onClose }: ReportWizardProps) {
               </div>
             )}
             
-            {/* Images Step */}
-            {currentStep === 'images' && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium mb-4">
-                  {language === 'he' ? 'הוסף תמונות' : 'Add Images'}
-                </h3>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <button
-                      key={i}
-                      className="aspect-square rounded-xl border-2 border-dashed border-border bg-muted/50 flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/5 transition-all"
-                    >
-                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
-                        {language === 'he' ? 'הוסף תמונה' : 'Add image'}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-                
-                <div className="flex items-center gap-3 p-3 bg-muted rounded-xl">
-                  <input
-                    type="checkbox"
-                    id="blur"
-                    checked={formData.blurImages}
-                    onChange={(e) => setFormData({ ...formData, blurImages: e.target.checked })}
-                    className="w-5 h-5 rounded accent-primary"
-                  />
-                  <label htmlFor="blur" className="text-sm">
-                    {language === 'he' 
-                      ? 'טשטש תמונות כברירת מחדל (מומלץ לפרטיות)' 
-                      : 'Blur images by default (recommended for privacy)'
-                    }
-                  </label>
-                </div>
-              </div>
-            )}
             
             {/* Publish Step */}
             {currentStep === 'publish' && (

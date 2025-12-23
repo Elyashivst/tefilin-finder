@@ -19,8 +19,14 @@ export function TopBar() {
   const { isAuthenticated, user, language, setSnapPoint } = useApp();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast.success(language === 'he' ? 'התנתקת בהצלחה' : 'Logged out successfully');
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Logout error:', error);
+      toast.error(language === 'he' ? 'שגיאה בהתנתקות' : 'Error logging out');
+    } else {
+      toast.success(language === 'he' ? 'התנתקת בהצלחה' : 'Logged out successfully');
+      navigate('/');
+    }
   };
   
   
