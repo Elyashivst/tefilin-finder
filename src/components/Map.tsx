@@ -173,16 +173,23 @@ export function Map() {
   };
 
   const createMarkerIcon = (status: 'lost' | 'found', isSelected: boolean) => {
-    const color = status === 'lost' ? '#EF4444' : '#22C55E';
-    const scale = isSelected ? 1.3 : 1;
+    // Softer, more pleasant colors
+    const color = status === 'lost' ? '#D9534F' : '#4DAF7C';
+    const size = isSelected ? 44 : 36;
     
     return {
-      path: google.maps.SymbolPath.CIRCLE,
-      fillColor: color,
-      fillOpacity: 1,
-      strokeColor: '#FFFFFF',
-      strokeWeight: 2,
-      scale: 12 * scale,
+      url: '/images/marker-icon.png',
+      scaledSize: new google.maps.Size(size, size),
+      anchor: new google.maps.Point(size / 2, size / 2),
+    };
+  };
+
+  const getMarkerLabel = (status: 'lost' | 'found'): google.maps.MarkerLabel => {
+    return {
+      text: status === 'lost' ? '!' : '✓',
+      color: status === 'lost' ? '#D9534F' : '#4DAF7C',
+      fontSize: '14px',
+      fontWeight: 'bold',
     };
   };
 
