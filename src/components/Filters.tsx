@@ -1,48 +1,60 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Filter, MapPin, Calendar, Palette, Tag, Image as ImageIcon } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Search, X, MapPin } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FilterState, TefillinType } from '@/types';
+import { FilterState } from '@/types';
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
+
+const GOOGLE_MAPS_API_KEY = 'AIzaSyDlEJnKlsZHbXl0Cq1mfeCLxCQGh7aKE20';
+const libraries: ("places")[] = ['places'];
 
 interface FiltersProps {
   onClose?: () => void;
 }
 
 export function Filters({ onClose }: FiltersProps) {
-  const { language, filters, setFilters, clearFilters } = useApp();
+  const { language, filters, setFilters, clearFilters, setMapCenter } = useApp();
   const [localFilters, setLocalFilters] = useState<FilterState>(filters);
+  const [addressValue, setAddressValue] = useState('');
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   
-  const statusOptions = [
-    { value: undefined, label: language === 'he' ? 'הכל' : 'All' },
-    { value: 'lost' as const, label: language === 'he' ? 'אבד' : 'Lost' },
-    { value: 'found' as const, label: language === 'he' ? 'נמצא' : 'Found' },
-  ];
-  
-  const typeOptions = [
-    { value: undefined, label: language === 'he' ? 'הכל' : 'All' },
-    { value: 'yad' as TefillinType, label: language === 'he' ? 'של יד' : 'Yad' },
-    { value: 'rosh' as TefillinType, label: language === 'he' ? 'של ראש' : 'Rosh' },
-    { value: 'set' as TefillinType, label: language === 'he' ? 'סט מלא' : 'Full Set' },
-  ];
-  
-  const colorOptions = [
-    { value: undefined, label: language === 'he' ? 'הכל' : 'All' },
-    { value: 'שחור', label: language === 'he' ? 'שחור' : 'Black' },
-    { value: 'כחול', label: language === 'he' ? 'כחול' : 'Blue' },
-    { value: 'חום', label: language === 'he' ? 'חום' : 'Brown' },
-    { value: 'בורדו', label: language === 'he' ? 'בורדו' : 'Burgundy' },
-  ];
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    libraries,
+    language: 'he',
+    region: 'IL',
+  });
   
   const radiusOptions = [
-    { value: undefined, label: language === 'he' ? 'ללא הגבלה' : 'No Limit' },
+    { value: undefined, label: language === 'he' ? 'הכל' : 'All' },
     { value: 1, label: '1 ' + (language === 'he' ? 'ק"מ' : 'km') },
     { value: 5, label: '5 ' + (language === 'he' ? 'ק"מ' : 'km') },
     { value: 10, label: '10 ' + (language === 'he' ? 'ק"מ' : 'km') },
     { value: 25, label: '25 ' + (language === 'he' ? 'ק"מ' : 'km') },
-    { value: 50, label: '50 ' + (language === 'he' ? 'ק"מ' : 'km') },
   ];
+
+  const onAutocompleteLoad = (autocomplete: google.maps.places.Autocomplete) => {
+    autocompleteRef.current = autocomplete;
+  };
+
+  const onPlaceChanged = () => {
+    if (autocompleteRef.current) {
+      const place = autocompleteRef.current.getPlace();
+      if (place.geometry?.location) {
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        setMapCenter({ lat, lng });
+        setAddressValue(place.formatted_address || '');
+        
+        const city = place.address_components?.find(
+          comp => comp.types.includes('locality')
+        )?.long_name || '';
+        
+        setLocalFilters({ ...localFilters, city });
+      }
+    }
+  };
   
   const handleApply = () => {
     setFilters(localFilters);
@@ -51,157 +63,79 @@ export function Filters({ onClose }: FiltersProps) {
   
   const handleClear = () => {
     setLocalFilters({});
+    setAddressValue('');
     clearFilters();
   };
   
-  const hasFilters = Object.values(localFilters).some(v => v !== undefined && v !== '');
+  const hasFilters = localFilters.radius !== undefined || localFilters.city;
   
   return (
-    <div className="p-4 space-y-5">
-      {/* Search */}
+    <div className="p-3 space-y-3 border-b border-border">
+      {/* Address search */}
       <div className="relative">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder={language === 'he' ? 'חיפוש חופשי...' : 'Free search...'}
-          value={localFilters.query || ''}
-          onChange={(e) => setLocalFilters({ ...localFilters, query: e.target.value })}
-          className="pr-10 bg-muted border-0"
-        />
-      </div>
-      
-      {/* Status */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          {language === 'he' ? 'סטטוס' : 'Status'}
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {statusOptions.map((option) => (
-            <Button
-              key={option.label}
-              variant={localFilters.status === option.value ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setLocalFilters({ ...localFilters, status: option.value })}
-              className={
-                localFilters.status === option.value 
-                  ? 'bg-gradient-gold text-primary-foreground border-0' 
-                  : ''
-              }
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-      
-      {/* Type */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium flex items-center gap-2">
-          <Tag className="h-4 w-4 text-muted-foreground" />
-          {language === 'he' ? 'סוג תפילין' : 'Tefillin Type'}
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {typeOptions.map((option) => (
-            <Button
-              key={option.label}
-              variant={localFilters.tefillinType === option.value ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setLocalFilters({ ...localFilters, tefillinType: option.value })}
-              className={
-                localFilters.tefillinType === option.value 
-                  ? 'bg-gradient-gold text-primary-foreground border-0' 
-                  : ''
-              }
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
+        <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+        {isLoaded ? (
+          <Autocomplete
+            onLoad={onAutocompleteLoad}
+            onPlaceChanged={onPlaceChanged}
+            options={{ componentRestrictions: { country: 'il' } }}
+          >
+            <Input
+              placeholder={language === 'he' ? 'חפש לפי כתובת...' : 'Search by address...'}
+              value={addressValue}
+              onChange={(e) => setAddressValue(e.target.value)}
+              className="pr-10 h-10 bg-muted border-0"
+            />
+          </Autocomplete>
+        ) : (
+          <Input
+            placeholder={language === 'he' ? 'טוען...' : 'Loading...'}
+            disabled
+            className="pr-10 h-10 bg-muted border-0"
+          />
+        )}
       </div>
       
       {/* Radius */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-muted-foreground" />
-          {language === 'he' ? 'רדיוס' : 'Radius'}
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {radiusOptions.map((option) => (
-            <Button
-              key={option.label}
-              variant={localFilters.radius === option.value ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setLocalFilters({ ...localFilters, radius: option.value })}
-              className={
-                localFilters.radius === option.value 
-                  ? 'bg-gradient-gold text-primary-foreground border-0' 
-                  : ''
-              }
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-      
-      {/* Color */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium flex items-center gap-2">
-          <Palette className="h-4 w-4 text-muted-foreground" />
-          {language === 'he' ? 'צבע תיק' : 'Bag Color'}
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {colorOptions.map((option) => (
-            <Button
-              key={option.label}
-              variant={localFilters.bagColor === option.value ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setLocalFilters({ ...localFilters, bagColor: option.value })}
-              className={
-                localFilters.bagColor === option.value 
-                  ? 'bg-gradient-gold text-primary-foreground border-0' 
-                  : ''
-              }
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-      
-      {/* Has Images */}
-      <div className="flex items-center gap-3">
-        <Button
-          variant={localFilters.hasImages ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setLocalFilters({ ...localFilters, hasImages: !localFilters.hasImages })}
-          className={`gap-2 ${
-            localFilters.hasImages 
-              ? 'bg-gradient-gold text-primary-foreground border-0' 
-              : ''
-          }`}
-        >
-          <ImageIcon className="h-4 w-4" />
-          {language === 'he' ? 'רק עם תמונות' : 'With Images Only'}
-        </Button>
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-sm text-muted-foreground">
+          {language === 'he' ? 'רדיוס:' : 'Radius:'}
+        </span>
+        {radiusOptions.map((option) => (
+          <Button
+            key={option.label}
+            variant={localFilters.radius === option.value ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setLocalFilters({ ...localFilters, radius: option.value })}
+            className={`h-8 px-3 ${
+              localFilters.radius === option.value 
+                ? 'bg-gradient-gold text-primary-foreground border-0' 
+                : ''
+            }`}
+          >
+            {option.label}
+          </Button>
+        ))}
       </div>
       
       {/* Actions */}
-      <div className="flex gap-3 pt-2">
+      <div className="flex gap-2">
         <Button 
           onClick={handleApply}
-          className="flex-1 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          size="sm"
+          className="flex-1 h-9 bg-gradient-gold text-primary-foreground hover:opacity-90"
         >
-          {language === 'he' ? 'החל פילטרים' : 'Apply Filters'}
+          {language === 'he' ? 'חפש' : 'Search'}
         </Button>
         
         {hasFilters && (
           <Button 
             variant="outline"
+            size="sm"
             onClick={handleClear}
-            className="gap-2"
+            className="h-9 gap-1"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
             {language === 'he' ? 'נקה' : 'Clear'}
           </Button>
         )}
