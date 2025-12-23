@@ -127,9 +127,55 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsLoadingListings(false);
   }, []);
 
-  // Load listings on mount
+  // Load listings on mount and subscribe to realtime updates
   useEffect(() => {
     fetchListings();
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel('listings-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'listings'
+        },
+        (payload) => {
+          const newListing = mapDbRowToListing(payload.new);
+          setListings(prev => [newListing, ...prev]);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'listings'
+        },
+        (payload) => {
+          const updatedListing = mapDbRowToListing(payload.new);
+          setListings(prev => prev.map(l => 
+            l.id === updatedListing.id ? updatedListing : l
+          ));
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'listings'
+        },
+        (payload) => {
+          setListings(prev => prev.filter(l => l.id !== payload.old.id));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchListings]);
 
   const addListing = async (listing: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'>) => {
