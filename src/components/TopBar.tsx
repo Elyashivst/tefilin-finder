@@ -66,6 +66,7 @@ export function TopBar() {
                   variant="ghost"
                   size="icon"
                   className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                  onClick={() => toast.info(language === 'he' ? 'אין הודעות חדשות' : 'No new messages')}
                 >
                   <MessageCircle className="h-5 w-5" />
                 </Button>
@@ -74,6 +75,7 @@ export function TopBar() {
                   variant="ghost"
                   size="icon"
                   className="h-9 w-9 text-muted-foreground hover:text-foreground relative"
+                  onClick={() => toast.info(language === 'he' ? 'אין התראות חדשות' : 'No new notifications')}
                 >
                   <Bell className="h-5 w-5" />
                   <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />

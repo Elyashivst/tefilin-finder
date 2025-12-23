@@ -28,29 +28,21 @@ import { Listing } from '@/types';
 
 export default function MyListings() {
   const navigate = useNavigate();
-  const { user, isAuthenticated, listings, language } = useApp();
-  const [userListings, setUserListings] = useState<Listing[]>([]);
+  const { user, isAuthenticated, listings, language, updateListing, deleteListing: deleteListingFromContext } = useApp();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
+
+  // Filter listings for current user
+  const userListings = user ? listings.filter(l => l.userId === user.id) : [];
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/auth?redirect=my-listings');
-      return;
     }
-    
-    // Filter listings for current user (mock data for now)
-    // In production, this would fetch from Supabase
-    if (user) {
-      const myListings = listings.filter(l => l.userId === user.id);
-      setUserListings(myListings);
-    }
-  }, [isAuthenticated, user, listings, navigate]);
+  }, [isAuthenticated, navigate]);
 
   const handleMarkResolved = (listingId: string) => {
-    setUserListings(prev => 
-      prev.map(l => l.id === listingId ? { ...l, isResolved: true, isActive: false } : l)
-    );
+    updateListing(listingId, { isResolved: true, isActive: false });
     toast.success(language === 'he' ? 'המודעה סומנה כנמצא!' : 'Listing marked as found!');
   };
 
@@ -61,7 +53,7 @@ export default function MyListings() {
 
   const confirmDelete = () => {
     if (selectedListingId) {
-      setUserListings(prev => prev.filter(l => l.id !== selectedListingId));
+      deleteListingFromContext(selectedListingId);
       toast.success(language === 'he' ? 'המודעה נמחקה' : 'Listing deleted');
       setDeleteDialogOpen(false);
       setSelectedListingId(null);

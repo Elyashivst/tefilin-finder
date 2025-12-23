@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { LocationPicker } from '@/components/LocationPicker';
 import { ReportStep, TefillinType } from '@/types';
-import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const steps: ReportStep[] = ['status', 'location', 'details', 'images', 'publish'];
 
@@ -27,12 +27,14 @@ interface ReportWizardProps {
 
 export function ReportWizard({ onClose }: ReportWizardProps) {
   const navigate = useNavigate();
-  const { language, reportStatus, setReportStatus, isAuthenticated, user } = useApp();
+  const { language, reportStatus, setReportStatus, isAuthenticated, user, addListing } = useApp();
   const [currentStep, setCurrentStep] = useState<ReportStep>('status');
   const [formData, setFormData] = useState({
     status: reportStatus || 'lost' as const,
     date: new Date().toISOString().split('T')[0],
     time: '',
+    latitude: 31.7683,
+    longitude: 35.2137,
     address: '',
     city: '',
     tefillinType: 'set' as TefillinType,
@@ -70,13 +72,35 @@ export function ReportWizard({ onClose }: ReportWizardProps) {
   };
   
   const handlePublish = () => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
       // Store form data in session storage and redirect to auth
       sessionStorage.setItem('pendingReport', JSON.stringify(formData));
       navigate('/auth?redirect=report');
       return;
     }
-    // Would submit to backend here
+    
+    // Add the listing
+    addListing({
+      status: formData.status,
+      userId: user.id,
+      latitude: formData.latitude,
+      longitude: formData.longitude,
+      address: formData.address,
+      city: formData.city,
+      date: formData.date,
+      time: formData.time,
+      tefillinType: formData.tefillinType,
+      bagColor: formData.bagColor,
+      markings: formData.markings,
+      inscription: formData.inscription,
+      notes: formData.notes,
+      images: [],
+      blurImages: formData.blurImages,
+      isActive: true,
+      isResolved: false,
+    });
+    
+    toast.success(language === 'he' ? 'המודעה פורסמה בהצלחה!' : 'Listing published successfully!');
     onClose();
   };
 
@@ -213,6 +237,8 @@ export function ReportWizard({ onClose }: ReportWizardProps) {
                   onLocationSelect={(location) => {
                     setFormData({
                       ...formData,
+                      latitude: location.lat,
+                      longitude: location.lng,
                       address: location.address,
                       city: location.city,
                     });

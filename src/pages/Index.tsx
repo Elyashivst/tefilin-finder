@@ -1,10 +1,10 @@
 import { TopBar } from '@/components/TopBar';
 import { Map } from '@/components/Map';
 import { BottomSheet } from '@/components/BottomSheet';
-import { AppProvider, useApp } from '@/contexts/AppContext';
+import { useApp } from '@/contexts/AppContext';
 import { Helmet } from 'react-helmet-async';
 
-function AppContent() {
+export default function Home() {
   const { language, direction } = useApp();
   
   return (
@@ -34,13 +34,5 @@ function AppContent() {
       {/* Bottom Sheet */}
       <BottomSheet />
     </div>
-  );
-}
-
-export default function Home() {
-  return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
   );
 }
