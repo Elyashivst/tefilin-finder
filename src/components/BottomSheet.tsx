@@ -110,7 +110,7 @@ export function BottomSheet() {
       );
     }
     
-    // Preview mode when listing is selected (show even when full)
+    // Preview mode when listing is selected - expand sheet automatically
     if (selectedListing) {
       return (
         <ListingPreview 

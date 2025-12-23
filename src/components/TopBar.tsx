@@ -39,6 +39,7 @@ export function TopBar() {
   const navLinks = [
     { path: '/', label: language === 'he' ? 'מפה' : 'Map', icon: MapPin },
     { path: '/my-listings', label: language === 'he' ? 'הפרסומים שלי' : 'My Listings', icon: FileText },
+    { path: '/my-claims', label: language === 'he' ? 'פניות' : 'Claims', icon: Bell },
     { path: '/profile', label: language === 'he' ? 'פרופיל' : 'Profile', icon: User },
   ];
   

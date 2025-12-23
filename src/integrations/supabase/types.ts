@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      claims: {
+        Row: {
+          claimant_name: string
+          claimant_note: string | null
+          claimant_phone: string
+          claimant_user_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          listing_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          claimant_name: string
+          claimant_note?: string | null
+          claimant_phone: string
+          claimant_user_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          listing_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          claimant_name?: string
+          claimant_note?: string | null
+          claimant_phone?: string
+          claimant_user_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          listing_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
           address: string | null
