@@ -313,12 +313,14 @@ export function ReportWizard({ onClose }: ReportWizardProps) {
                   className="bg-muted border-0"
                 />
                 
-                <Input
-                  placeholder={language === 'he' ? 'סימנים מזהים' : 'Identifying marks'}
-                  value={formData.markings}
-                  onChange={(e) => setFormData({ ...formData, markings: e.target.value })}
-                  className="bg-muted border-0"
-                />
+                {formData.status === 'lost' && (
+                  <Input
+                    placeholder={language === 'he' ? 'סימנים מזהים' : 'Identifying marks'}
+                    value={formData.markings}
+                    onChange={(e) => setFormData({ ...formData, markings: e.target.value })}
+                    className="bg-muted border-0"
+                  />
+                )}
                 
                 <Textarea
                   placeholder={language === 'he' ? 'הערות נוספות...' : 'Additional notes...'}
