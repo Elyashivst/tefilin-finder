@@ -1,110 +1,31 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Listing, FilterState, SnapPoint, MapBounds, User } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 
-// Mock data for demonstration
-const mockListings: Listing[] = [
-  {
-    id: '1',
-    status: 'lost',
-    userId: 'user1',
-    latitude: 31.7683,
-    longitude: 35.2137,
-    address: 'רחוב יפו 100',
-    city: 'ירושלים',
-    date: '2024-01-15',
-    time: '14:30',
-    createdAt: '2024-01-15T14:30:00Z',
-    updatedAt: '2024-01-15T14:30:00Z',
-    tefillinType: 'set',
-    bagColor: 'שחור',
-    markings: 'רצועות חדשות',
-    inscription: 'יוסף בן דוד',
-    notes: 'נשכחו באוטובוס קו 1',
-    images: [],
-    blurImages: true,
-    isActive: true,
-    isResolved: false,
-  },
-  {
-    id: '2',
-    status: 'found',
-    userId: 'user2',
-    latitude: 32.0853,
-    longitude: 34.7818,
-    address: 'רחוב דיזנגוף 50',
-    city: 'תל אביב',
-    date: '2024-01-14',
-    time: '09:00',
-    createdAt: '2024-01-14T09:00:00Z',
-    updatedAt: '2024-01-14T09:00:00Z',
-    tefillinType: 'yad',
-    bagColor: 'כחול',
-    notes: 'נמצאו על ספסל בפארק',
-    images: [],
-    blurImages: true,
-    isActive: true,
-    isResolved: false,
-  },
-  {
-    id: '3',
-    status: 'lost',
-    userId: 'user3',
-    latitude: 32.7940,
-    longitude: 34.9896,
-    address: 'רחוב הנמל',
-    city: 'חיפה',
-    date: '2024-01-13',
-    createdAt: '2024-01-13T11:00:00Z',
-    updatedAt: '2024-01-13T11:00:00Z',
-    tefillinType: 'set',
-    bagColor: 'חום',
-    inscription: 'מ.כ.',
-    images: [],
-    blurImages: false,
-    isActive: true,
-    isResolved: false,
-  },
-  {
-    id: '4',
-    status: 'found',
-    userId: 'user4',
-    latitude: 31.2530,
-    longitude: 34.7915,
-    address: 'שדרות רגר',
-    city: 'באר שבע',
-    date: '2024-01-12',
-    createdAt: '2024-01-12T16:00:00Z',
-    updatedAt: '2024-01-12T16:00:00Z',
-    tefillinType: 'rosh',
-    bagColor: 'שחור',
-    notes: 'נמצאו ליד בית הכנסת',
-    images: [],
-    blurImages: true,
-    isActive: true,
-    isResolved: false,
-  },
-  {
-    id: '5',
-    status: 'lost',
-    userId: 'user5',
-    latitude: 31.8928,
-    longitude: 34.8113,
-    address: 'רחוב הרצל',
-    city: 'רחובות',
-    date: '2024-01-11',
-    createdAt: '2024-01-11T08:00:00Z',
-    updatedAt: '2024-01-11T08:00:00Z',
-    tefillinType: 'set',
-    bagColor: 'בורדו',
-    markings: 'תיק עור איכותי',
-    images: [],
-    blurImages: true,
-    isActive: true,
-    isResolved: false,
-  },
-];
+// Helper function to convert DB row to Listing type
+const mapDbRowToListing = (row: any): Listing => ({
+  id: row.id,
+  status: row.status,
+  userId: row.user_id,
+  latitude: row.latitude,
+  longitude: row.longitude,
+  address: row.address,
+  city: row.city,
+  date: row.date,
+  time: row.time,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+  tefillinType: row.tefillin_type,
+  bagColor: row.bag_color,
+  markings: row.markings,
+  inscription: row.inscription,
+  notes: row.notes,
+  images: row.images || [],
+  blurImages: row.blur_images,
+  isActive: row.is_active,
+  isResolved: row.is_resolved,
+});
 
 interface AppContextType {
   // User
@@ -114,9 +35,9 @@ interface AppContextType {
   
   // Listings
   listings: Listing[];
-  addListing: (listing: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateListing: (id: string, updates: Partial<Listing>) => void;
-  deleteListing: (id: string) => void;
+  addListing: (listing: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateListing: (id: string, updates: Partial<Listing>) => Promise<void>;
+  deleteListing: (id: string) => Promise<void>;
   selectedListing: Listing | null;
   setSelectedListing: (listing: Listing | null) => void;
   
@@ -186,27 +107,110 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Listings
-  const [listings, setListings] = useState<Listing[]>(mockListings);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [isLoadingListings, setIsLoadingListings] = useState(true);
 
-  const addListing = (listing: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newListing: Listing = {
-      ...listing,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setListings(prev => [newListing, ...prev]);
+  // Fetch listings from Supabase
+  const fetchListings = useCallback(async () => {
+    setIsLoadingListings(true);
+    const { data, error } = await supabase
+      .from('listings')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching listings:', error);
+    } else if (data) {
+      setListings(data.map(mapDbRowToListing));
+    }
+    setIsLoadingListings(false);
+  }, []);
+
+  // Load listings on mount
+  useEffect(() => {
+    fetchListings();
+  }, [fetchListings]);
+
+  const addListing = async (listing: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const { data, error } = await supabase
+      .from('listings')
+      .insert({
+        user_id: listing.userId,
+        status: listing.status,
+        latitude: listing.latitude,
+        longitude: listing.longitude,
+        address: listing.address,
+        city: listing.city,
+        date: listing.date,
+        time: listing.time || null,
+        tefillin_type: listing.tefillinType,
+        bag_color: listing.bagColor || null,
+        markings: listing.markings || null,
+        inscription: listing.inscription || null,
+        notes: listing.notes || null,
+        images: listing.images,
+        blur_images: listing.blurImages,
+        is_active: listing.isActive,
+        is_resolved: listing.isResolved,
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error adding listing:', error);
+      throw error;
+    } else if (data) {
+      setListings(prev => [mapDbRowToListing(data), ...prev]);
+    }
   };
 
-  const updateListing = (id: string, updates: Partial<Listing>) => {
-    setListings(prev => prev.map(l => 
-      l.id === id ? { ...l, ...updates, updatedAt: new Date().toISOString() } : l
-    ));
+  const updateListing = async (id: string, updates: Partial<Listing>) => {
+    const dbUpdates: any = {};
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+    if (updates.latitude !== undefined) dbUpdates.latitude = updates.latitude;
+    if (updates.longitude !== undefined) dbUpdates.longitude = updates.longitude;
+    if (updates.address !== undefined) dbUpdates.address = updates.address;
+    if (updates.city !== undefined) dbUpdates.city = updates.city;
+    if (updates.date !== undefined) dbUpdates.date = updates.date;
+    if (updates.time !== undefined) dbUpdates.time = updates.time;
+    if (updates.tefillinType !== undefined) dbUpdates.tefillin_type = updates.tefillinType;
+    if (updates.bagColor !== undefined) dbUpdates.bag_color = updates.bagColor;
+    if (updates.markings !== undefined) dbUpdates.markings = updates.markings;
+    if (updates.inscription !== undefined) dbUpdates.inscription = updates.inscription;
+    if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+    if (updates.images !== undefined) dbUpdates.images = updates.images;
+    if (updates.blurImages !== undefined) dbUpdates.blur_images = updates.blurImages;
+    if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive;
+    if (updates.isResolved !== undefined) dbUpdates.is_resolved = updates.isResolved;
+
+    const { error } = await supabase
+      .from('listings')
+      .update(dbUpdates)
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error updating listing:', error);
+      throw error;
+    } else {
+      setListings(prev => prev.map(l => 
+        l.id === id ? { ...l, ...updates, updatedAt: new Date().toISOString() } : l
+      ));
+    }
   };
 
-  const deleteListing = (id: string) => {
-    setListings(prev => prev.filter(l => l.id !== id));
+  const deleteListing = async (id: string) => {
+    const { error } = await supabase
+      .from('listings')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting listing:', error);
+      throw error;
+    } else {
+      setListings(prev => prev.filter(l => l.id !== id));
+    }
   };
   
   // Filters

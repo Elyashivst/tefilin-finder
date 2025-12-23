@@ -14,7 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      listings: {
+        Row: {
+          address: string | null
+          bag_color: string | null
+          blur_images: boolean
+          city: string | null
+          created_at: string
+          date: string
+          id: string
+          images: string[] | null
+          inscription: string | null
+          is_active: boolean
+          is_resolved: boolean
+          latitude: number
+          longitude: number
+          markings: string | null
+          notes: string | null
+          status: string
+          tefillin_type: string
+          time: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          bag_color?: string | null
+          blur_images?: boolean
+          city?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          images?: string[] | null
+          inscription?: string | null
+          is_active?: boolean
+          is_resolved?: boolean
+          latitude: number
+          longitude: number
+          markings?: string | null
+          notes?: string | null
+          status: string
+          tefillin_type?: string
+          time?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          bag_color?: string | null
+          blur_images?: boolean
+          city?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          images?: string[] | null
+          inscription?: string | null
+          is_active?: boolean
+          is_resolved?: boolean
+          latitude?: number
+          longitude?: number
+          markings?: string | null
+          notes?: string | null
+          status?: string
+          tefillin_type?: string
+          time?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

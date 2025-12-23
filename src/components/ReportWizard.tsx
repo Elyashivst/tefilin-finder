@@ -71,7 +71,7 @@ export function ReportWizard({ onClose }: ReportWizardProps) {
     }
   };
   
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!isAuthenticated || !user) {
       // Store form data in session storage and redirect to auth
       sessionStorage.setItem('pendingReport', JSON.stringify(formData));
@@ -79,29 +79,33 @@ export function ReportWizard({ onClose }: ReportWizardProps) {
       return;
     }
     
-    // Add the listing
-    addListing({
-      status: formData.status,
-      userId: user.id,
-      latitude: formData.latitude,
-      longitude: formData.longitude,
-      address: formData.address,
-      city: formData.city,
-      date: formData.date,
-      time: formData.time,
-      tefillinType: formData.tefillinType,
-      bagColor: formData.bagColor,
-      markings: formData.markings,
-      inscription: formData.inscription,
-      notes: formData.notes,
-      images: [],
-      blurImages: formData.blurImages,
-      isActive: true,
-      isResolved: false,
-    });
-    
-    toast.success(language === 'he' ? 'המודעה פורסמה בהצלחה!' : 'Listing published successfully!');
-    onClose();
+    try {
+      // Add the listing
+      await addListing({
+        status: formData.status,
+        userId: user.id,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        address: formData.address,
+        city: formData.city,
+        date: formData.date,
+        time: formData.time,
+        tefillinType: formData.tefillinType,
+        bagColor: formData.bagColor,
+        markings: formData.markings,
+        inscription: formData.inscription,
+        notes: formData.notes,
+        images: [],
+        blurImages: formData.blurImages,
+        isActive: true,
+        isResolved: false,
+      });
+      
+      toast.success(language === 'he' ? 'המודעה פורסמה בהצלחה!' : 'Listing published successfully!');
+      onClose();
+    } catch (error) {
+      toast.error(language === 'he' ? 'שגיאה בפרסום המודעה' : 'Error publishing listing');
+    }
   };
 
   const handleLoginClick = () => {
