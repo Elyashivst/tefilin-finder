@@ -9,12 +9,17 @@ import { Filters } from '@/components/Filters';
 import { ReportWizard } from '@/components/ReportWizard';
 import { AlertCircle, Search, CheckCircle } from 'lucide-react';
 
-// Snap point heights (from bottom)
-const SNAP_HEIGHTS = {
-  peek: 180,
-  half: typeof window !== 'undefined' ? window.innerHeight * 0.5 : 400,
-  full: typeof window !== 'undefined' ? window.innerHeight - 60 : 700,
+// Snap point heights (from bottom) - calculate safely
+const getSnapHeights = () => {
+  const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+  return {
+    peek: 180,
+    half: windowHeight * 0.5,
+    full: windowHeight - 60,
+  };
 };
+
+const SNAP_HEIGHTS = getSnapHeights();
 
 export function BottomSheet() {
   const { 
