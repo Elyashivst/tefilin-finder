@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Listing, FilterState, SnapPoint, MapBounds, User } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
+import { Session } from '@supabase/supabase-js';
 
 // Mock data for demonstration
 const mockListings: Listing[] = [
@@ -147,7 +149,39 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   // User state
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   
+  // Sync with Supabase auth
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email,
+          displayName: session.user.user_metadata?.name || session.user.email?.split('@')[0],
+          createdAt: session.user.created_at || new Date().toISOString(),
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email,
+          displayName: session.user.user_metadata?.name || session.user.email?.split('@')[0],
+          createdAt: session.user.created_at || new Date().toISOString(),
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Listings
   const [listings] = useState<Listing[]>(mockListings);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
