@@ -1,4 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Noto+Sans+Hebrew:wght@300;400;500;600;700&display=swap');
+@font-face {
+  font-family: 'SimonaPro';
+  src: url('/fonts/SimonaPro-Regular.woff') format('woff'),
+       url('/fonts/SimonaPro-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -138,7 +147,7 @@
   }
 
   html {
-    font-family: 'Heebo', 'Noto Sans Hebrew', system-ui, sans-serif;
+    font-family: 'SimonaPro', 'Heebo', system-ui, sans-serif;
     height: 100%;
     height: 100dvh;
   }
@@ -159,11 +168,11 @@
 
   /* RTL Support */
   [dir="rtl"] {
-    font-family: 'Heebo', 'Noto Sans Hebrew', system-ui, sans-serif;
+    font-family: 'SimonaPro', 'Heebo', system-ui, sans-serif;
   }
 
   [dir="ltr"] {
-    font-family: 'Heebo', system-ui, sans-serif;
+    font-family: 'SimonaPro', 'Heebo', system-ui, sans-serif;
   }
 }
 

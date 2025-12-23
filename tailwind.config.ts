@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Heebo', 'Noto Sans Hebrew', 'system-ui', 'sans-serif'],
-        hebrew: ['Heebo', 'Noto Sans Hebrew', 'sans-serif'],
+        sans: ['SimonaPro', 'Heebo', 'system-ui', 'sans-serif'],
+        hebrew: ['SimonaPro', 'Heebo', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
