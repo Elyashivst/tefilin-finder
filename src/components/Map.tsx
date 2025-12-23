@@ -176,18 +176,16 @@ export function Map() {
     // Softer, more pleasant colors
     const color = status === 'lost' ? '#D9534F' : '#4DAF7C';
     const size = isSelected ? 44 : 36;
-    const iconScale = isSelected ? 0.45 : 0.4;
     
-    // SVG with circle background and tefillin-like icon in white
+    // Different icons: exclamation mark for lost, checkmark for found
+    const iconPath = status === 'lost' 
+      ? `<text x="${size/2}" y="${size/2 + 6}" text-anchor="middle" fill="white" font-size="${size * 0.5}" font-weight="bold" font-family="Arial">!</text>`
+      : `<path d="M${size * 0.3} ${size * 0.5} L${size * 0.45} ${size * 0.65} L${size * 0.7} ${size * 0.35}" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+    
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
         <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
-        <g transform="translate(${size/2}, ${size/2}) scale(${iconScale}) translate(-24, -24)" fill="white">
-          <path d="M12 2L6 8v6l6 6 6-6V8l-6-6zm0 2.8L16 9v4l-4 4-4-4V9l4-4.2z"/>
-          <rect x="10" y="14" width="4" height="8" rx="1"/>
-          <path d="M8 16c-2 1-4 3-4 6h2c0-2 1.5-3.5 3-4.5"/>
-          <path d="M16 16c2 1 4 3 4 6h-2c0-2-1.5-3.5-3-4.5"/>
-        </g>
+        ${iconPath}
       </svg>
     `;
     
