@@ -16,17 +16,22 @@ import logoIcon from '@/assets/logo-icon.png';
 
 export function TopBar() {
   const navigate = useNavigate();
-  const { isAuthenticated, user, language, setSnapPoint } = useApp();
+  const { isAuthenticated, user, language, setSnapPoint, setUser } = useApp();
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    // Always clear the local session so UI + RLS state updates immediately,
+    // even if the server reports "session not found".
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
+    setUser(null);
+
     if (error) {
       console.error('Logout error:', error);
       toast.error(language === 'he' ? 'שגיאה בהתנתקות' : 'Error logging out');
-    } else {
-      toast.success(language === 'he' ? 'התנתקת בהצלחה' : 'Logged out successfully');
-      navigate('/');
+      return;
     }
+
+    toast.success(language === 'he' ? 'התנתקת בהצלחה' : 'Logged out successfully');
+    navigate('/');
   };
   
   
